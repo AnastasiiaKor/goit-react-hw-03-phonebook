@@ -9,7 +9,7 @@ import { Button } from '../ContactForm/ContactForm.styled';
 
 class App extends Component {
   state = {
-    contacts: [],
+    contacts: JSON.parse(localStorage.getItem('contacts')) ?? [],
     filter: '',
     showModal: false,
   };
@@ -26,39 +26,25 @@ class App extends Component {
     }
   }
 
-  componentDidMount() {
-    if (
-      localStorage.getItem('contacts') &&
-      JSON.parse(localStorage.getItem('contacts')).length
-    ) {
-      this.setState({
-        contacts: JSON.parse(localStorage.getItem('contacts')),
-      });
-    }
-  }
   toggleModal = () => {
     this.setState(({ showModal }) => ({
       showModal: !showModal,
     }));
   };
 
-  filterChangeHandler = event => {
-    this.setState({ filter: event.target.value });
+  filterChangeHandler = ({ target: { name, value } }) => {
+    this.setState({ [name]: value });
   };
 
   formSubmitHandler = data => {
     if (this.state.contacts.find(contact => contact.name === data.name)) {
       alert(`${data.name} is alreary in contacts`);
-    } else {
-      const newContact = { ...data };
-      newContact.id = nanoid();
-      this.setState(prevState => {
-        return { contacts: [...prevState.contacts, newContact] };
-      });
+      return;
     }
+    const newContact = { id: nanoid(6), ...data };
+    this.setState(({ contacts }) => ({ contacts: [...contacts, newContact] }));
   };
-  deleteContactHandler = event => {
-    const id = event.target.id;
+  deleteContactHandler = ({ target: { id } }) => {
     this.setState(prevState => ({
       contacts: prevState.contacts.filter(contact => contact.id !== id),
     }));
